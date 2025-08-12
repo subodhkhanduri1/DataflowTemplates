@@ -149,7 +149,11 @@ public class MongoDbUtils implements Serializable {
           });
       row.set("timestamp", localDate.format(TIMEFORMAT));
     } else if (userOption.equals("JSON")) {
-      JsonObject sourceDataJsonObject = GSON.toJsonTree(document).getAsJsonObject();
+      GsonBuilder gsonBuilder = new GsonBuilder();
+      gsonBuilder.setDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+      Gson gson = gsonBuilder.create();
+
+      JsonObject sourceDataJsonObject = gson.toJsonTree(document).getAsJsonObject();
 
       // Convert to a Map
       Map<String, Object> sourceDataMap =
