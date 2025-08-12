@@ -168,6 +168,8 @@ public class MongoDbCdcToBigQuery {
               mongoDbUri, options.getDatabase(), options.getCollection(), options.getUserOption());
     }
 
+    LOG.info(bigquerySchema.toPrettyString());
+
     pipeline
         .apply("Read PubSub Messages", PubsubIO.readStrings().fromTopic(inputOption))
         .apply(
