@@ -66,8 +66,10 @@ public class MongoDbUtils implements Serializable {
    * column table with _id, document as a Json string and timestamp by default Or the Table schema
    * can be flattened version of the document with each field as a column for userOption "FLATTEN".
    */
+
+  static final String TIMESTAMP_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
   static final DateTimeFormatter TIMEFORMAT =
-      DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
+      DateTimeFormatter.ofPattern(TIMESTAMP_FORMAT);
 
   private static final Logger LOG = LoggerFactory.getLogger(MongoDbToBigQuery.class);
 
@@ -151,7 +153,7 @@ public class MongoDbUtils implements Serializable {
       row.set("timestamp", localDate.format(TIMEFORMAT));
     } else if (userOption.equals("JSON")) {
       // Required to format timestamps as accepted by BigQuery
-      Gson gson = new GsonBuilder().setDateFormat(TIMEFORMAT.toString()).create();
+      Gson gson = new GsonBuilder().setDateFormat(TIMESTAMP_FORMAT).create();
 
       JsonObject sourceDataJsonObject = gson.toJsonTree(document).getAsJsonObject();
 
