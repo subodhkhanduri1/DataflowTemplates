@@ -126,7 +126,7 @@ public class MongoDbToBigQueryOptions {
 
     @TemplateParameter.GcsReadFile(
         order = 2,
-        optional = true,
+        groupName = "Target",
         description = "Cloud Storage path to BigQuery JSON schema",
         helpText = "The Cloud Storage path for the BigQuery JSON schema.",
         example = "gs://your-bucket/your-schema.json")
