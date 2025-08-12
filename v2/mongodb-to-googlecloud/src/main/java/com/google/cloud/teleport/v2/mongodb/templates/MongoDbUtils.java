@@ -150,9 +150,8 @@ public class MongoDbUtils implements Serializable {
           });
       row.set("timestamp", localDate.format(TIMEFORMAT));
     } else if (userOption.equals("JSON")) {
-      GsonBuilder gsonBuilder = new GsonBuilder();
-      gsonBuilder.setDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-      Gson gson = gsonBuilder.create();
+      // Required to format timestamps as accepted by BigQuery
+      Gson gson = new GsonBuilder().setDateFormat(TIMEFORMAT.toString()).create();
 
       JsonObject sourceDataJsonObject = gson.toJsonTree(document).getAsJsonObject();
 
@@ -160,9 +159,15 @@ public class MongoDbUtils implements Serializable {
       Map<String, Object> sourceDataMap =
           GSON.fromJson(sourceDataJsonObject, new TypeToken<Map<String, Object>>() {}.getType());
 
-      row.set("id", document.get("_id").toString())
-          .set("source_data", sourceDataMap)
-          .set("timestamp", localDate.format(TIMEFORMAT));
+      for(String key : sourceDataMap.keySet()) {
+        row.set(key, sourceDataMap.get(key));
+      }
+
+      row.set("_ts", localDate.format(TIMEFORMAT));
+
+      // row.set("id", document.get("_id").toString())
+      //     .set("source_data", sourceDataMap)
+      //     .set("timestamp", localDate.format(TIMEFORMAT));
     } else {
       String sourceData = GSON.toJson(document);
 
