@@ -154,7 +154,6 @@ public class MongoDbUtils implements Serializable {
     } else if (userOption.equals("JSON")) {
       // Required to format timestamps as accepted by BigQuery
       Gson gson = new GsonBuilder().setDateFormat(TIMESTAMP_FORMAT).create();
-
       JsonObject sourceDataJsonObject = gson.toJsonTree(document).getAsJsonObject();
 
       // Convert to a Map
@@ -167,10 +166,6 @@ public class MongoDbUtils implements Serializable {
 
       row.set("_id", document.get("_id").toString());
       row.set("_ts", localDate.format(TIMEFORMAT));
-
-      // row.set("id", document.get("_id").toString())
-      //     .set("source_data", sourceDataMap)
-      //     .set("timestamp", localDate.format(TIMEFORMAT));
     } else {
       String sourceData = GSON.toJson(document);
 
