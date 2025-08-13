@@ -144,31 +144,31 @@ public class MongoDbCdcToBigQuery {
     TableSchema bigquerySchema;
 
     // Get MongoDbUri
-    String mongoDbUri = maybeDecrypt(options.getMongoDbUri(), options.getKMSEncryptionKey()).get();
+    // String mongoDbUri = maybeDecrypt(options.getMongoDbUri(), options.getKMSEncryptionKey()).get();
 
-    if (options.getBigQuerySchemaPath() != null) {
-      // initialize FileSystem to read from GCS
-      FileSystems.setDefaultPipelineOptions(options);
-      String jsonSchema = getGcsFileAsString(options.getBigQuerySchemaPath());
-      GsonFactory gf = new GsonFactory();
-      bigquerySchema = gf.fromString(jsonSchema, TableSchema.class);
-    } else if (options.getJavascriptDocumentTransformFunctionName() != null
-        && options.getJavascriptDocumentTransformGcsPath() != null) {
-      bigquerySchema =
-          MongoDbUtils.getTableFieldSchemaForUDF(
-              mongoDbUri,
-              options.getDatabase(),
-              options.getCollection(),
-              options.getJavascriptDocumentTransformGcsPath(),
-              options.getJavascriptDocumentTransformFunctionName(),
-              options.getUserOption());
-    } else {
-      bigquerySchema =
-          MongoDbUtils.getTableFieldSchema(
-              mongoDbUri, options.getDatabase(), options.getCollection(), options.getUserOption());
+    if (options.getBigQuerySchemaPath() == null || options.getBigQuerySchemaPath().isEmpty()) {
+      throw new RuntimeException("Required " + options.getBigQuerySchemaPath() + " is not set or missing.");
     }
 
-    LOG.info(bigquerySchema.toPrettyString());
+    bigquerySchema = loadBigQuerySchemaFromGcs(options);
+
+    // else if (options.getJavascriptDocumentTransformFunctionName() != null
+    //     && options.getJavascriptDocumentTransformGcsPath() != null) {
+    //   bigquerySchema =
+    //       MongoDbUtils.getTableFieldSchemaForUDF(
+    //           mongoDbUri,
+    //           options.getDatabase(),
+    //           options.getCollection(),
+    //           options.getJavascriptDocumentTransformGcsPath(),
+    //           options.getJavascriptDocumentTransformFunctionName(),
+    //           options.getUserOption());
+    // } else {
+    //   bigquerySchema =
+    //       MongoDbUtils.getTableFieldSchema(
+    //           mongoDbUri, options.getDatabase(), options.getCollection(), options.getUserOption());
+    // }
+
+    LOG.info(bigquerySchema.toPrettyString());  
 
     pipeline
         .apply("Read PubSub Messages", PubsubIO.readStrings().fromTopic(inputOption))
@@ -207,5 +207,14 @@ public class MongoDbCdcToBigQuery {
                 .withWriteDisposition(BigQueryIO.Write.WriteDisposition.WRITE_APPEND));
     pipeline.run();
     return true;
+  }
+
+  private static TableSchema loadBigQuerySchemaFromGcs(Options options) throws IOException {
+    // initialize FileSystem to read from GCS
+    FileSystems.setDefaultPipelineOptions(options);
+    
+    String jsonSchema = getGcsFileAsString(options.getBigQuerySchemaPath());
+    GsonFactory gf = new GsonFactory();
+    return gf.fromString(jsonSchema, TableSchema.class);
   }
 }
