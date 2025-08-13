@@ -165,6 +165,7 @@ public class MongoDbUtils implements Serializable {
         row.set(key, sourceDataMap.get(key));
       }
 
+      row.set("_id", document.get("_id").toString());
       row.set("_ts", localDate.format(TIMEFORMAT));
 
       // row.set("id", document.get("_id").toString())
