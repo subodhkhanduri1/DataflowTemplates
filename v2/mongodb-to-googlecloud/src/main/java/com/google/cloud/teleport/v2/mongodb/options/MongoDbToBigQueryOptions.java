@@ -58,21 +58,6 @@ public class MongoDbToBigQueryOptions {
 
     void setCollection(String collection);
 
-    @TemplateParameter.Enum(
-        order = 4,
-        enumOptions = {
-          @TemplateEnumOption("FLATTEN"),
-          @TemplateEnumOption("JSON"),
-          @TemplateEnumOption("NONE")
-        },
-        description = "User option",
-        helpText =
-            "`FLATTEN`, `JSON`, or `NONE`. `FLATTEN` flattens the documents to the single level. `JSON` stores document in BigQuery JSON format. `NONE` stores the whole document as a JSON-formatted STRING.")
-    @Default.String("NONE")
-    String getUserOption();
-
-    void setUserOption(String userOption);
-
     @TemplateParameter.KmsEncryptionKey(
         order = 5,
         optional = true,
@@ -133,6 +118,21 @@ public class MongoDbToBigQueryOptions {
     String getBigQuerySchemaPath();
 
     void setBigQuerySchemaPath(String path);
+
+    @TemplateParameter.Enum(
+        order = 4,
+        enumOptions = {
+          @TemplateEnumOption("FLATTEN"),
+          @TemplateEnumOption("JSON"),
+          @TemplateEnumOption("NONE")
+        },
+        description = "User option",
+        helpText =
+            "`FLATTEN`, `JSON`, or `NONE`. `FLATTEN` flattens the documents to the single level. `JSON` stores document in BigQuery JSON format. `NONE` stores the whole document as a JSON-formatted STRING.")
+    @Default.String("NONE")
+    String getUserOption();
+
+    void setUserOption(String userOption);
   }
 
   /** UDF options. */
