@@ -29,34 +29,34 @@ public class MongoDbToBigQueryOptions {
 
   /** Options for Reading MongoDb Documents. */
   public interface MongoDbOptions extends PipelineOptions, DataflowPipelineOptions {
-    @TemplateParameter.Text(
-        order = 1,
-        groupName = "Source",
-        description = "MongoDB Connection URI",
-        helpText = "The MongoDB connection URI in the format `mongodb+srv://:@.`")
-    String getMongoDbUri();
+    // @TemplateParameter.Text(
+    //     order = 1,
+    //     groupName = "Source",
+    //     description = "MongoDB Connection URI",
+    //     helpText = "The MongoDB connection URI in the format `mongodb+srv://:@.`")
+    // String getMongoDbUri();
 
-    void setMongoDbUri(String getMongoDbUri);
+    // void setMongoDbUri(String getMongoDbUri);
 
-    @TemplateParameter.Text(
-        order = 2,
-        groupName = "Source",
-        description = "MongoDB database",
-        helpText = "Database in MongoDB to read the collection from.",
-        example = "my-db")
-    String getDatabase();
+    // @TemplateParameter.Text(
+    //     order = 2,
+    //     groupName = "Source",
+    //     description = "MongoDB database",
+    //     helpText = "Database in MongoDB to read the collection from.",
+    //     example = "my-db")
+    // String getDatabase();
 
-    void setDatabase(String database);
+    // void setDatabase(String database);
 
-    @TemplateParameter.Text(
-        order = 3,
-        groupName = "Source",
-        description = "MongoDB collection",
-        helpText = "Name of the collection inside MongoDB database.",
-        example = "my-collection")
-    String getCollection();
+    // @TemplateParameter.Text(
+    //     order = 3,
+    //     groupName = "Source",
+    //     description = "MongoDB collection",
+    //     helpText = "Name of the collection inside MongoDB database.",
+    //     example = "my-collection")
+    // String getCollection();
 
-    void setCollection(String collection);
+    // void setCollection(String collection);
 
     @TemplateParameter.Enum(
         order = 4,
@@ -126,7 +126,7 @@ public class MongoDbToBigQueryOptions {
 
     @TemplateParameter.GcsReadFile(
         order = 2,
-        optional = true,
+        groupName = "Target",
         description = "Cloud Storage path to BigQuery JSON schema",
         helpText = "The Cloud Storage path for the BigQuery JSON schema.",
         example = "gs://your-bucket/your-schema.json")
