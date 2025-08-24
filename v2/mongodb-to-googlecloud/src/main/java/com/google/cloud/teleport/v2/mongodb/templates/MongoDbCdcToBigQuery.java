@@ -32,7 +32,6 @@ import com.google.cloud.teleport.v2.options.BigQueryStorageApiStreamingOptions;
 import com.google.cloud.teleport.v2.transforms.JavascriptDocumentTransformer.TransformDocumentViaJavascript;
 import com.google.cloud.teleport.v2.utils.BigQueryIOUtils;
 import java.io.IOException;
-import java.util.HashSet;
 import javax.script.ScriptException;
 import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.io.FileSystems;
@@ -46,8 +45,6 @@ import org.apache.beam.sdk.transforms.ParDo;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Arrays;
 
 /**
  * The {@link MongoDbCdcToBigQuery} pipeline is a streaming pipeline which reads data pushed to
@@ -139,7 +136,7 @@ public class MongoDbCdcToBigQuery {
     options.setStreaming(true);
     Pipeline pipeline = Pipeline.create(options);
     String userOption = options.getUserOption();
-    String inputOption = options.getInputTopic();
+    String inputSubscription = options.getInputSubscription();
 
     TableSchema bigquerySchema;
 
@@ -152,7 +149,7 @@ public class MongoDbCdcToBigQuery {
     LOG.info(bigquerySchema.toPrettyString());
 
     pipeline
-        .apply("Read PubSub Messages", PubsubIO.readStrings().fromTopic(inputOption))
+        .apply("Read PubSub Messages", PubsubIO.readStrings().fromSubscription(inputSubscription))
         .apply(
             "RTransform string to document",
             ParDo.of(
@@ -186,11 +183,6 @@ public class MongoDbCdcToBigQuery {
                 .withSchema(bigquerySchema)
                 .withCreateDisposition(BigQueryIO.Write.CreateDisposition.CREATE_IF_NEEDED)
                 .withWriteDisposition(BigQueryIO.Write.WriteDisposition.WRITE_APPEND)
-                .withSchemaUpdateOptions(
-                  new HashSet<BigQueryIO.Write.SchemaUpdateOption>(
-                    Arrays.asList(BigQueryIO.Write.SchemaUpdateOption.ALLOW_FIELD_ADDITION)
-                  )
-                )
               );
     pipeline.run();
     return true;
