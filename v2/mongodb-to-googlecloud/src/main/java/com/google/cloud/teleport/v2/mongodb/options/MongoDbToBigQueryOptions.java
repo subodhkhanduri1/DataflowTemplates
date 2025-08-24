@@ -85,15 +85,15 @@ public class MongoDbToBigQueryOptions {
 
   /** Options for reading from PubSub. */
   public interface PubSubOptions extends PipelineOptions, DataflowPipelineOptions {
-    @TemplateParameter.PubsubTopic(
+    @TemplateParameter.PubsubSubscription(
         order = 1,
         groupName = "Source",
-        description = "Pub/Sub input topic",
+        description = "Pub/Sub input subscription",
         helpText =
-            "The Pub/Sub input topic to read from, in the format of `projects/<PROJECT_ID>/topics/<TOPIC_NAME>`.")
-    String getInputTopic();
+            "The Pub/Sub input subscription to read from, in the format of `projects/<PROJECT_ID>/subscriptions/<SUBSCRIPTION_NAME>`.")
+    String getInputSubscription();
 
-    void setInputTopic(String inputTopic);
+    void setInputSubscription(String inputSubscription);
   }
 
   /** Options for Reading BigQuery Rows. */
