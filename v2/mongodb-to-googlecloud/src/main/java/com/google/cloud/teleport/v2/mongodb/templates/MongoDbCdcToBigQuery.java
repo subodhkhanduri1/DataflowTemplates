@@ -29,7 +29,6 @@ import com.google.cloud.teleport.v2.mongodb.options.MongoDbToBigQueryOptions.Jav
 import com.google.cloud.teleport.v2.mongodb.options.MongoDbToBigQueryOptions.PubSubOptions;
 import com.google.cloud.teleport.v2.mongodb.templates.MongoDbCdcToBigQuery.Options;
 import com.google.cloud.teleport.v2.options.BigQueryStorageApiStreamingOptions;
-import com.google.cloud.teleport.v2.transforms.JavascriptDocumentTransformer.TransformDocumentViaJavascript;
 import com.google.cloud.teleport.v2.utils.BigQueryIOUtils;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
@@ -171,12 +170,6 @@ public class MongoDbCdcToBigQuery {
                   }
                 }))
         .apply(
-            "UDF",
-            TransformDocumentViaJavascript.newBuilder()
-                .setFileSystemPath(options.getJavascriptDocumentTransformGcsPath())
-                .setFunctionName(options.getJavascriptDocumentTransformFunctionName())
-                .build())
-        .apply(
             "Read and transform data",
             ParDo.of(
                 new DoFn<Document, TableRow>() {
@@ -191,6 +184,7 @@ public class MongoDbCdcToBigQuery {
             BigQueryIO.writeTableRows()
                 .to(options.getOutputTableSpec())
                 .withSchema(bigquerySchema)
+                .withMethod(BigQueryIO.Write.Method.STORAGE_API_AT_LEAST_ONCE)
                 .withPrimaryKey(ImmutableList.of(options.getOutputTablePrimaryKey()))
                 .withRowMutationInformationFn(mutationFnForUpsert)
                 .withCreateDisposition(BigQueryIO.Write.CreateDisposition.CREATE_IF_NEEDED)
