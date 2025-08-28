@@ -31,17 +31,20 @@ import com.google.cloud.teleport.v2.mongodb.templates.MongoDbCdcToBigQuery.Optio
 import com.google.cloud.teleport.v2.options.BigQueryStorageApiStreamingOptions;
 import com.google.cloud.teleport.v2.transforms.JavascriptDocumentTransformer.TransformDocumentViaJavascript;
 import com.google.cloud.teleport.v2.utils.BigQueryIOUtils;
+import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import javax.script.ScriptException;
 import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.io.FileSystems;
 import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO;
+import org.apache.beam.sdk.io.gcp.bigquery.RowMutationInformation;
 import org.apache.beam.sdk.io.gcp.pubsub.PubsubIO;
 import org.apache.beam.sdk.options.Default;
 import org.apache.beam.sdk.options.PipelineOptions;
 import org.apache.beam.sdk.options.PipelineOptionsFactory;
 import org.apache.beam.sdk.transforms.DoFn;
 import org.apache.beam.sdk.transforms.ParDo;
+import org.apache.beam.sdk.transforms.SerializableFunction;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -148,6 +151,13 @@ public class MongoDbCdcToBigQuery {
 
     LOG.info(bigquerySchema.toPrettyString());
 
+    // Define a function to generate RowMutationInformation from a TableRow
+    SerializableFunction<TableRow, RowMutationInformation> mutationFnForUpsert = tableRow -> {
+        String sequenceNumber = Long.toHexString((Long) tableRow.get("_ts"));
+        
+        return RowMutationInformation.of(RowMutationInformation.MutationType.UPSERT, sequenceNumber);
+    };
+
     pipeline
         .apply("Read PubSub Messages", PubsubIO.readStrings().fromSubscription(inputSubscription))
         .apply(
@@ -181,8 +191,11 @@ public class MongoDbCdcToBigQuery {
             BigQueryIO.writeTableRows()
                 .to(options.getOutputTableSpec())
                 .withSchema(bigquerySchema)
+                .withPrimaryKey(ImmutableList.of(options.getOutputTablePrimaryKey()))
+                .withRowMutationInformationFn(mutationFnForUpsert)
                 .withCreateDisposition(BigQueryIO.Write.CreateDisposition.CREATE_IF_NEEDED)
                 .withWriteDisposition(BigQueryIO.Write.WriteDisposition.WRITE_APPEND)
+                .ignoreUnknownValues()
               );
     pipeline.run();
     return true;
