@@ -109,6 +109,16 @@ public class MongoDbToBigQueryOptions {
 
     void setOutputTableSpec(String outputTableSpec);
 
+    @TemplateParameter.Text(
+        order = 1,
+        groupName = "Target",
+        description = "BigQuery output table primary key",
+        helpText =
+            "The BigQuery table primary key. For example, `bigquery-project:dataset.output_table`.")
+    String getOutputTablePrimaryKey();
+
+    void setOutputTablePrimaryKey(String outputTablePrimaryKey);
+
     @TemplateParameter.GcsReadFile(
         order = 2,
         groupName = "Target",
